@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+
+<body>
+    <canvas id='canvas'></canvas>
+    <script>
+    window.onload = function() {
+        var canvas = document.getElementById('canvas'),
+            ctx = canvas.getContext('2d');
+        //Make the canvas occupy the full page
+        var W = window.innerWidth,
+            H = window.innerHeight;
+        //存放所有的粒子
+        var particles = [];
+        var particle_count = 100;
+        var mouse={};
+        for (var i = 0; i < particle_count; i++) {
+            particles.push(new particle());
+        }
+        canvas.addEventListener('mousemove', trace_mouse, false);
+
+        function trace_mouse(e) {
+            mouse.x = e.pageX;
+            mouse.y = e.pageY;
+        }
+
+        function particle() {
+            //radius
+            this.radius = 10 + Math.random() * 20;
+            //locations
+            if (mouse.x && mouse.y) {
+                this.location = {
+                    x: mouse.x,
+                    y: mouse.y
+                }
+            } else {
+                this.location = {
+                    x: W / 2,
+                    y: H / 2
+                };
+            }
+            //speed
+            this.speed = {
+                x: -2.5 + Math.random() * 5,
+                y: -15 + Math.random() * 10
+            };
+            //add life range
+            this.life = Math.random() * 10 + 20;
+            this.remaining_life = this.life;
+            //color
+            this.r = Math.round(Math.random() * 255);
+            this.g = Math.round(Math.random() * 255);
+            this.b = Math.round(Math.random() * 255);
+        }
+
+        function draw() {
+            canvas.width = W;
+            canvas.height = H;
+            ctx.globalCompositeOperation='source-out';
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, W, H);
+            ctx.globalCompositeOperation='lighter';
+            //this will stay at same location
+            for (var i = 0; i < particles.length; i++) {
+                var p = particles[i];
+                ctx.beginPath();
+                p.opacity = Math.round(p.remaining_life / p.life * 100) / 100
+                ctx.fillStyle = "rgba(255, 255, 255, " + p.opacity + ")";
+                //
+                var gradient = ctx.createRadialGradient(p.location.x, p.location.y, 0, p.location.x, p.location.y, p.radius);
+                gradient.addColorStop(0, "rgba(" + p.r + ", " + p.g + ", " + p.b + ", " + p.opacity + ")");
+                gradient.addColorStop(0.5, "rgba(" + p.r + ", " + p.g + ", " + p.b + ", " + p.opacity + ")");
+                gradient.addColorStop(1, "rgba(" + p.r + ", " + p.g + ", " + p.b + ", 0)");
+                ctx.fillStyle = gradient
+
+                ctx.arc(p.location.x, p.location.y, p.radius, Math.PI * 2, false);
+
+                ctx.fill();
+                p.remaining_life--;
+                p.radius--;
+                //let move the particles
+                p.location.x += p.speed.x;
+                p.location.y += p.speed.y;
+                if (p.remaining_life < 0 || p.radius < 0) {
+                    particles[i] = new particle();
+                }
+            }
+        }
+        setInterval(draw, 33);
+    }
+    </script>
+</body>
+
+</html>
