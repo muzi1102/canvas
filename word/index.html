@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+    canvas {
+        border: 1px solid #000;
+    }
+    </style>
+</head>
+
+<body>
+    <canvas id='canvas' width="500" height="400">
+    </canvas>
+    <div class="input">
+    	<input type="text" placeholder="请输入文字" id='input'>
+    	<button>开始</button>
+    </div>
+</body>
+<script type="text/javascript">
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+var input=document.getElementById('input');
+var btn=document.getElementsByTagName('button')[0];
+var dots = [];
+
+function init() {
+	var txt=input.value;
+    ctx.beginPath();
+    ctx.font = "80px Arial";
+    ctx.fillStyle = "rgba(0,0,0,1)";
+    ctx.fillText(txt, 150, 150);
+    ctx.fill();
+    var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var y = 0; y < img.height; y += 3) {
+        for (var x = 0; x < img.width; x += 3) {
+            var i = (x + y * img.width) * 4;
+            var dot = {
+                x: 0,
+                y: 0
+            }
+            if (img.data[i + 3] > 128) {
+                dot.x = x;
+                dot.y = y;
+                dots.push(dot)
+            }
+        }
+    }
+    var draw = function() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for (var m = 0; m < dots.length; m++) {
+            ctx.beginPath();
+            ctx.arc(dots[m].x, dots[m].y, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    draw();
+}
+btn.addEventListener('click', init)
+</script>
+
+</html>
